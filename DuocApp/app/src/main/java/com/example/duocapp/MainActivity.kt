@@ -29,7 +29,10 @@ class MainActivity : ComponentActivity() {
                     LoginScreen(navController)
                 }
                 composable(Routes.RegistrarScreen,){
-                    RegistrarseScreen()
+                    RegistrarseScreen(navController)
+                }
+                composable(Routes.HomeScreen,){
+                    HomeScreen(navController)
                 }
             } )
         }
