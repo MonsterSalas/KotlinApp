@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.duocapp.Routes
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +57,7 @@ fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     //Varibales para futuro consumo de api para traer texto
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -102,6 +104,8 @@ fun HomeScreen(navController: NavController) {
             FloatingActionButton(
                 onClick = {
                     //Esto me debe llevar a la pestannia de creacion de texto
+                    navController.navigate(Routes.VozATexto)
+
                 },
                 modifier = Modifier
             ) {

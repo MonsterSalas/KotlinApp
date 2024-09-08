@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.duocapp.screens.HomeScreen
 import com.example.duocapp.screens.LoginScreen
 import com.example.duocapp.screens.RegistrarseScreen
+import com.example.duocapp.screens.VozATexto
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +27,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(Routes.HomeScreen,){
                     HomeScreen(navController)
+                }
+                composable(Routes.VozATexto,){
+                    VozATexto(navController)
                 }
             } )
         }
