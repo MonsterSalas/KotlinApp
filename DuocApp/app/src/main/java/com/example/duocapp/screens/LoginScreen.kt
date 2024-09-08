@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -59,26 +60,43 @@ fun LoginScreen(navController: NavController) {
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            if (userManager.isValidUser(correo, pass)) {
-                Toast.makeText(context, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
-                navController.navigate(Routes.HomeScreen)
-                //Aca  debo dejar logica para inicio de sesion exitoso
-            } else {
-                Toast.makeText(context, "Usuario o contraseña incorrecta", Toast.LENGTH_SHORT).show()
-            }
-        },
-            ) {
+        Button(
+            onClick = {
+                if (userManager.isValidUser(correo, pass)) {
+                    Toast.makeText(context, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
+                    navController.navigate(Routes.HomeScreen)
+                } else {
+                    Toast.makeText(context, "Usuario o contraseña incorrecta", Toast.LENGTH_SHORT).show()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)  // El botón ocupará el 80% del ancho disponible
+                .height(56.dp)       // Ajusta la altura del botón a 56dp
+        ) {
             Text(text = "Iniciar Sesión")
         }
         Spacer(modifier = Modifier.height(32.dp))
-        TextButton(onClick = { /*TODO*/ }) {
-            Text(text = "¿Olvidaste tu contraseña?")
+
+        TextButton(
+            onClick = { /*TODO*/ },
+            modifier = Modifier
+                .fillMaxWidth()  // Hace que el botón ocupe todo el ancho disponible
+                .height(60.dp)   // Aumenta la altura del botón
+        ) {
+            Text(text = "¿Olvidaste tu contraseña?", fontSize = 18.sp)  // Aumenta el tamaño del texto
         }
-        TextButton(onClick = {
-            navController.navigate(Routes.RegistrarScreen)
-        }) {
-            Text(text = "¡Quiero registrarme!")
+
+        Spacer(modifier = Modifier.height(16.dp))  // Espaciador adicional
+
+        TextButton(
+            onClick = {
+                navController.navigate(Routes.RegistrarScreen)
+            },
+            modifier = Modifier
+                .fillMaxWidth()  // Hace que el botón ocupe todo el ancho disponible
+                .height(60.dp)   // Aumenta la altura del botón
+        ) {
+            Text(text = "¡Quiero registrarme!", fontSize = 18.sp)  // Aumenta el tamaño del texto
         }
     }
 }
