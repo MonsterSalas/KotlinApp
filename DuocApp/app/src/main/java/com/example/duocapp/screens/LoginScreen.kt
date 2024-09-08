@@ -1,4 +1,4 @@
-package com.example.duocapp
+package com.example.duocapp.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,8 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.provider.FontsContractCompat.Columns
 import androidx.navigation.NavController
+import com.example.duocapp.R
+import com.example.duocapp.Routes
+import com.example.duocapp.UserManager
 
 @Composable
 fun LoginScreen(navController: NavController) {
