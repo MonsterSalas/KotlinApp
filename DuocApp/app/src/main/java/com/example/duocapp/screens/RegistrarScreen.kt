@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
@@ -67,16 +68,22 @@ fun RegistrarseScreen(navController: NavController) {
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            if (correo.isNotEmpty() && pass.isNotEmpty()) {
-                userManager.saveUser(correo, pass)
-                Toast.makeText(context, "Usuario registrado exitosamente", Toast.LENGTH_SHORT).show()
-                navController.popBackStack()  // Navegar de regreso al login
-            } else {
-                Toast.makeText(context, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show()
-            }
-        }) {
+        Button(
+            onClick = {
+                if (correo.isNotEmpty() && pass.isNotEmpty()) {
+                    userManager.saveUser(correo, pass)
+                    Toast.makeText(context, "Usuario registrado exitosamente", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()  // Navegar de regreso al login
+                } else {
+                    Toast.makeText(context, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)  // El botón ocupará el 80% del ancho disponible
+                .height(56.dp)       // Ajusta la altura del botón a 56dp
+        ) {
             Text(text = "Registrarse")
         }
+
     }
 }
