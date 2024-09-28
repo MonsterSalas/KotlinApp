@@ -53,10 +53,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.duocapp.AuthViewModel
+import com.example.duocapp.R
 import com.example.duocapp.Routes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -164,7 +166,11 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
                 },
                 modifier = Modifier
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add")
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_mic_24),
+                    contentDescription = "Microfono",
+                    modifier = Modifier.size(24.dp) // Ajusta el tamaño
+                )
             }
         }
     ) { innerPadding ->
