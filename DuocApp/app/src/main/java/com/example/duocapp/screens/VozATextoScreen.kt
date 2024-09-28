@@ -32,13 +32,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 import android.app.Activity
+import android.widget.Toast
+import androidx.compose.material3.Button
 import androidx.compose.ui.res.painterResource
+import com.example.duocapp.AuthViewModel
 import com.example.duocapp.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VozATexto(navController: NavController) {
+fun VozATexto(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
 
     // Variable para almacenar el texto reconocido por voz
@@ -60,6 +65,9 @@ fun VozATexto(navController: NavController) {
             }
         }
     }
+
+    // Referencia al usuario autenticado
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     Scaffold(
         topBar = {
@@ -100,6 +108,33 @@ fun VozATexto(navController: NavController) {
                     fontSize = 30.sp,
                     modifier = Modifier.padding(16.dp)
                 )
+
+                // Botón para guardar el texto en Firebase
+                Button(
+                    onClick = {
+                        if (currentUser != null) {
+                            val userId = currentUser.uid
+                            val database = FirebaseDatabase.getInstance()
+                            val ref = database.getReference("users").child(userId).child("descriptions")
+                            val key = ref.push().key // Genera una nueva clave para la descripción
+
+                            key?.let {
+                                ref.child(it).setValue(recognizedText)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(context, "Descripción guardada correctamente", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(context, "Error al guardar: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                        } else {
+                            Toast.makeText(context, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text("Guardar Descripción")
+                }
             }
         }
     }

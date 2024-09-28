@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "339008190003",
+    "project_id": "duocapp-c6c53",
+    "storage_bucket": "duocapp-c6c53.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:339008190003:android:7804c9979f6bf173911546",
+        "android_client_info": {
+          "package_name": "com.example.duocapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJy6sqZ7H5JQyrG5RYonZqE8rVQUnmAAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

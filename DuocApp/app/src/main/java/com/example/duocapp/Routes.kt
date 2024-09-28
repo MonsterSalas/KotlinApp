@@ -5,4 +5,5 @@ object Routes {
     var RegistrarScreen = "RegistrarScreen"
     var HomeScreen = "HomeScreen"
     var VozATexto = "VozATexto"
+    var CreateTextScreen = "CreateTextScreen"
 }
