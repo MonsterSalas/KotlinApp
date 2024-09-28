@@ -35,16 +35,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -69,15 +73,13 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Variables para consumir los textos desde Firebase
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var userTexts by remember { mutableStateOf<List<String>>(emptyList()) }
-
-    // Variable para almacenar el texto seleccionado actualmente
     var selectedText by remember { mutableStateOf<String?>(null) }
+    var editingIndex by remember { mutableStateOf(-1) }
+    var editingText by remember { mutableStateOf("") }
 
-    // Inicializar Text-to-Speech
     val tts = remember {
         var ttsInstance: TextToSpeech? = null
         ttsInstance = TextToSpeech(context) { status ->
@@ -90,7 +92,6 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
         ttsInstance
     }
 
-    // Lista de textos por defecto
     val defaultTexts = listOf(
         "Hola, ¿cómo estás?",
         "Necesito ayuda",
@@ -99,10 +100,8 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
         "Adiós"
     )
 
-    // Obtener el usuario autenticado
     val currentUser = FirebaseAuth.getInstance().currentUser
 
-    // Cargar textos desde Firebase
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             val userId = currentUser.uid
@@ -147,7 +146,6 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
                 actions = {
                     IconButton(
                         onClick = {
-                            // Navegar a la pantalla de creación de texto (CreateTextScreen)
                             navController.navigate(Routes.CreateTextScreen)
                         }
                     ) {
@@ -162,7 +160,6 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    // Esto me debe llevar a la pestaña de creación de texto (VozATexto)
                     navController.navigate(Routes.VozATexto)
                 },
                 modifier = Modifier
@@ -191,10 +188,7 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
                 Text(text = errorMessage ?: "Unknown error")
             }
         } else {
-            // Combinar los textos por defecto con los textos del usuario
             val allTexts = defaultTexts + userTexts
-            var editingIndex by remember { mutableStateOf(-1) }
-            var editingText by remember { mutableStateOf("") }
 
             LazyColumn(
                 modifier = Modifier
@@ -205,28 +199,25 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
                 itemsIndexed(allTexts) { index, text ->
                     TextCard(
                         text = text,
-                        isSelected = selectedText == text, // Cambia el estado si es el texto seleccionado
+                        isSelected = selectedText == text,
+                        isEditing = index == editingIndex,
+                        editingText = if (index == editingIndex) editingText else text,
                         onClick = {
                             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
-                            selectedText = if (selectedText == text) null else text // Cambia la selección
+                            selectedText = if (selectedText == text) null else text
                         },
                         onDelete = {
-                            // Solo eliminar si el texto no es un texto por defecto
                             if (index >= defaultTexts.size) {
                                 val textToDelete = userTexts[index - defaultTexts.size]
-
-                                // Eliminar el texto de Firebase
                                 val userId = currentUser?.uid
                                 val database = FirebaseDatabase.getInstance()
                                 val ref = database.getReference("users").child(userId!!).child("descriptions")
 
-                                // Encuentra el nodo correspondiente al texto y elimínalo
                                 ref.orderByValue().equalTo(textToDelete).addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         for (childSnapshot in snapshot.children) {
                                             childSnapshot.ref.removeValue()
                                         }
-                                        // Eliminar el texto de la lista local
                                         userTexts = userTexts.toMutableList().apply {
                                             removeAt(index - defaultTexts.size)
                                         }
@@ -237,8 +228,49 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
                                     }
                                 })
                             }
+                        },
+                        onEdit = {
+                            if (index >= defaultTexts.size) {
+                                editingIndex = index
+                                editingText = text
+                            }
+                        },
+                        onEditingTextChange = { newText ->
+                            editingText = newText
+                        },
+                        onSaveEdit = {
+                            if (index >= defaultTexts.size) {
+                                val userId = currentUser?.uid
+                                val database = FirebaseDatabase.getInstance()
+                                val ref = database.getReference("users").child(userId!!).child("descriptions")
+
+                                ref.orderByValue().equalTo(text).addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        for (childSnapshot in snapshot.children) {
+                                            childSnapshot.ref.setValue(editingText)
+                                        }
+                                        userTexts = userTexts.toMutableList().apply {
+                                            set(index - defaultTexts.size, editingText)
+                                        }
+                                        editingIndex = -1
+                                        editingText = ""
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        // Manejo de errores
+                                    }
+                                })
+                            }
+                        },
+                        onCancelEdit = {
+                            editingIndex = -1
+                            editingText = ""
                         }
                     )
+                }
+                // Añadir un elemento adicional al final de la lista
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }
@@ -246,7 +278,18 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
 }
 
 @Composable
-fun TextCard(text: String, isSelected: Boolean, onClick: () -> Unit, onDelete: () -> Unit) {
+fun TextCard(
+    text: String,
+    isSelected: Boolean,
+    isEditing: Boolean,
+    editingText: String,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+    onEditingTextChange: (String) -> Unit,
+    onSaveEdit: () -> Unit,
+    onCancelEdit: () -> Unit
+) {
     ElevatedCard(
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) Color.LightGray else MaterialTheme.colorScheme.surface,
@@ -259,22 +302,47 @@ fun TextCard(text: String, isSelected: Boolean, onClick: () -> Unit, onDelete: (
             .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = text,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.weight(1f) // Asegura que el texto tenga el mismo espacio
+            if (isEditing) {
+                TextField(
+                    value = editingText,
+                    onValueChange = onEditingTextChange,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                IconButton(onClick = { onDelete() }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar texto"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onCancelEdit) {
+                        Text("Cancelar")
+                    }
+                    TextButton(onClick = onSaveEdit) {
+                        Text("Guardar")
+                    }
+                }
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = text,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        modifier = Modifier.weight(1f)
                     )
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar texto"
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Eliminar texto"
+                        )
+                    }
                 }
             }
         }
