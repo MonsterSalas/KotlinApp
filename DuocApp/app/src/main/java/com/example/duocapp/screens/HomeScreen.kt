@@ -43,6 +43,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -154,6 +155,17 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Crear Texto"
+                        )
+                    }
+                    // Botón de cierre de sesión
+                    IconButton(
+                        onClick = {
+                            authViewModel.signout()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Cerrar sesión"
                         )
                     }
                 }

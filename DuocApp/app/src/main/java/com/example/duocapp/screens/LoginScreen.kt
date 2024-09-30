@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,6 +34,7 @@ import com.example.duocapp.AuthState
 import com.example.duocapp.AuthViewModel
 import com.example.duocapp.R
 import com.example.duocapp.Routes
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 
@@ -44,6 +46,9 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
     val authState by authViewModel.authState.observeAsState()
     val scope = rememberCoroutineScope()
+
+    var showResetPasswordDialog by remember { mutableStateOf(false) }
+    var resetEmail by remember { mutableStateOf("") }
 
     LaunchedEffect(authState) {
         when (authState) {
@@ -103,7 +108,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
         Spacer(modifier = Modifier.height(32.dp))
         TextButton(
-            onClick = { /* TODO: Implementar recuperación de contraseña */ },
+            onClick = { showResetPasswordDialog = true },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
@@ -121,5 +126,49 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         ) {
             Text(text = "¡Quiero registrarme!", fontSize = 18.sp)
         }
+    }
+
+    if (showResetPasswordDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetPasswordDialog = false },
+            title = { Text("Restablecer Contraseña") },
+            text = {
+                Column {
+                    Text("Ingresa tu correo electrónico para recibir un enlace de restablecimiento de contraseña.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = resetEmail,
+                        onValueChange = { resetEmail = it },
+                        label = { Text("Correo Electrónico") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (resetEmail.isNotEmpty()) {
+                        FirebaseAuth.getInstance().sendPasswordResetEmail(resetEmail)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Se ha enviado un correo de restablecimiento de contraseña", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(context, "Error al enviar el correo: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                }
+                                showResetPasswordDialog = false
+                            }
+                    } else {
+                        Toast.makeText(context, "Por favor, ingresa un correo electrónico", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text("Enviar")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showResetPasswordDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
